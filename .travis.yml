@@ -30,4 +30,4 @@ services:
   - docker
   
 script:
-  - docker run -dt --rm -v $PWD:/home/tester registry.access.redhat.com/ubi8/ubi:8.5 bash -c "/home/tester/script.sh"
+  - docker run -t --rm -v $PWD:/home/tester registry.access.redhat.com/ubi8/ubi:8.5 bash -c "/home/tester/script.sh"
