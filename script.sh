@@ -19,10 +19,15 @@ echo "skip.installer=true" >> build.properties
 ant release
 export CATALINA_HOME=${HOME}/tomcat/output/dist
 export PATH=${HOME}/tomcat/output/dist/bin:${PATH}
-catalina.sh start &
-catalina.sh run &
 
-sleep 60
+catalina.sh run &
+until [ "`curl --silent --show-error --connect-timeout 1 -I http://localhost:8080 | grep 'Coyote'`" != "" ];
+do
+  echo "--- sleeping for 10 seconds"
+  sleep 10
+done
+
+echo "Tomcat is ready!"
 
 curl localhost:8080
 
