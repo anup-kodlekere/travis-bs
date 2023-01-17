@@ -23,5 +23,6 @@ catalina.sh start &
 catalina.sh run &
 
 curl localhost:8080
+curl localhost:8005
 
 catalina.sh stop
