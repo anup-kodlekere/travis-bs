@@ -9,7 +9,5 @@ services:
 
 script:
     - TRAVIS_PULL_REQUEST=2955
-    - OUT=$(curl -H 'Authorization: token $GH_TOKEN' https://api.github.com/repos/ppc64le/build-scripts/pulls/$TRAVIS_PULL_REQUEST/files)
-    - echo $OUT
-    - echo $OUT > /tmp/out.json
+    - wget -H 'Authorization: token $GH_TOKEN' https://api.github.com/repos/ppc64le/build-scripts/pulls/$TRAVIS_PULL_REQUEST/files > /tmp/out.json
     - cat /tmp/out.json
