@@ -11,18 +11,8 @@ services:
 before_install:
     - docker pull registry.access.redhat.com/ubi8/ubi:8.5
 
-jobs:
+matrix:
     include:
-#        - name: Build-script repo
-#          env: Validator
-#          script:
-#             - git clone https://github.com/ppc64le/build-scripts/
-#             - sudo apt update -y && sudo apt-get install file -y
-#             - pip3 install requests
-#             - pip3 install docker
-#             - python3 build-scripts/script/validate_builds.py $TRAVIS_PULL_REQUEST &
-#             - SCRIPT_PID=$!;while ps -p $SCRIPT_PID > /dev/null;do echo "$SCRIPT_PID is running"; sleep 60; done; wait $SCRIPT_PID; my_pid_status=$?; travis_terminate $my_pid_status
-
        - name: My repo
          env: personal   
          script:
