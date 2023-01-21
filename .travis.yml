@@ -1,6 +1,6 @@
 ---
 arch: ppc64le
-if: type = PR
+if: type = pull_request
 dist: focal
 os: linux
 language: shell
