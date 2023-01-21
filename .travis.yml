@@ -1,34 +1,35 @@
-# ---
-# arch: ppc64le
-# dist: focal
-# os: linux
-# language: shell
-
-# services:
-#     - docker
-
-# before_install:
-#     - docker pull registry.access.redhat.com/ubi8/ubi:8.5
-
-# script:
-#     - sudo apt update -y && sudo apt-get install file -y
-#     - pip3 install requests
-#     - pip3 install docker
-#     - python3 script/validate_builds.py script.sh &
-#     - SCRIPT_PID=$!;while ps -p $SCRIPT_PID > /dev/null;do echo "$SCRIPT_PID is running"; sleep 300; done; wait $SCRIPT_PID; my_pid_status=$?; travis_terminate $my_pid_status
-
-
-os: linux
+---
 arch: ppc64le
 dist: focal
+os: linux
 language: shell
 
-before_script:
-  - chmod +x script.sh
-
 services:
-  - docker
-  
+    - docker
+
+before_install:
+    - docker pull registry.access.redhat.com/ubi8/ubi:8.5
+
 script:
-  - docker run -dt --name test --rm -v $PWD:/home/tester registry.access.redhat.com/ubi8/ubi:8.5 bash -c "/home/tester/script.sh"
-  - docker logs -f test
+    - git clone https://github.com/ppc64le/build-scripts/
+    - sudo apt update -y && sudo apt-get install file -y
+    - pip3 install requests
+    - pip3 install docker
+    - python3 build-scripts/script/validate_builds.py $TRAVIS_PULL_REQUEST &
+    - SCRIPT_PID=$!;while ps -p $SCRIPT_PID > /dev/null;do echo "$SCRIPT_PID is running"; sleep 300; done; wait $SCRIPT_PID; my_pid_status=$?; travis_terminate $my_pid_status
+
+
+# os: linux
+# arch: ppc64le
+# dist: focal
+# language: shell
+
+# before_script:
+#   - chmod +x script.sh
+
+# services:
+#   - docker
+  
+# script:
+#   - docker run -dt --name test --rm -v $PWD:/home/tester registry.access.redhat.com/ubi8/ubi:8.5 bash -c "/home/tester/script.sh"
+#   - docker logs -f test
