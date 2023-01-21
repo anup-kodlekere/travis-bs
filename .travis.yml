@@ -1,5 +1,6 @@
 ---
 arch: ppc64le
+if: type = PR
 dist: focal
 os: linux
 language: shell
@@ -25,7 +26,7 @@ jobs:
        - name: My repo
          env: personal   
          script:   
-            - echo "Downloading PR # $TRAVIS_PULL_REQUEST script!"
+            - echo "Downloading PR $TRAVIS_PULL_REQUEST script!"
             - curl -H "Accept: application/json" -H "Authorization: token $GH_TOKEN" \
                 https://api.github.com/repos/anup-kodlekere/travis-bs/pulls/$TRAVIS_PULL_REQUEST/files > /tmp/out.json
             - wget $(jq .[0].raw_url /tmp/out.json | tr -d \")
