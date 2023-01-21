@@ -1,34 +1,58 @@
-PACKAGE_NAME=https://github.com/apache/tomcat.git
-PACKAGE_VERSION=${1:-v11.0.0-M1}
-PACKAGE_URL=https://github.com/apache/tomcat.git
-cd ${HOME}
-yum update -y
-TOMCAT_VERSION="11.0.0"
-yum install -y git wget
-yum install -y java-11-openjdk-devel
-wget http://mirror.downloadvn.com/apache/ant/binaries/apache-ant-1.10.12-bin.tar.gz
-tar -xf apache-ant-1.10.12-bin.tar.gz
-export ANT_HOME=${HOME}/apache-ant-1.10.12/
-export PATH=${PATH}:${ANT_HOME}/bin
-git clone https://github.com/apache/tomcat.git
-cd tomcat
-git checkout 11.0.0-M1
-yes | cp build.properties.default build.properties
-echo >> build.properties
-echo "skip.installer=true" >> build.properties
-ant release
-export CATALINA_HOME=${HOME}/tomcat/output/dist
-export PATH=${HOME}/tomcat/output/dist/bin:${PATH}
+#!/bin/bash -e
+# ----------------------------------------------------------------------------
+#
+# Package	: kiali
+# Version	: v1.62.0
+# Source repo	: https://github.com/kiali/kiali
+# Tested on	: UBI 8.5
+# Language   	: go
+# Travis-Check  : True
+# Script License: Apache License 2.0 or later
+# Maintainer	: Shantanu Kadam <shantanu.kadam@ibm.com>
+#
+# Disclaimer: This script has been tested in non-root mode on given
+# ==========  platform using the mentioned version of the package.
+#             It may not work as expected with newer versions of the
+#             package and/or distribution. In such case, please
+#             contact "Maintainer" of this script.
+#
+# ----------------------------------------------------------------------------
 
-catalina.sh run &
-until [ "`curl --silent --show-error --connect-timeout 1 -I http://localhost:8080 | grep 'Coyote'`" != "" ];
-do
-  echo "--- sleeping for 10 seconds"
-  sleep 10
-done
+# Install dependencies
+yum update -y && yum install -y gcc-c++ make python36 wget git tar zip npm
+npm install -g yarn
 
-echo "Tomcat is ready!"
+BUILD_VERSION=v1.62.0
 
-curl localhost:8080
+# go setup
+wget https://go.dev/dl/go1.18.7.linux-ppc64le.tar.gz
+tar -C /usr/local -xzf go1.18.7.linux-ppc64le.tar.gz
+export GOROOT=/usr/local/go/
+export GOPATH=$HOME
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-catalina.sh stop
+# node setup
+curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+nvm install 14
+nvm use 14
+
+# Clone git repository
+git clone https://github.com/kiali/kiali.git
+cd kiali/
+git checkout $BUILD_VERSION
+
+sed -i "97s/$/ --timeout 6m/" make/Makefile.build.mk
+make lint-install
+make lint
+
+# Build and test
+# build: Runs `make go-check` internally and build Kiali binary
+# test: Run tests, excluding third party tests under vendor and frontend
+make clean build test
+
+# build-ui: Runs the yarn commands to build the frontend UI
+# build-ui-test: Runs the yarn commands to build the dev frontend UI and runs the UI tests
+make clean-ui build-ui build-ui-test
